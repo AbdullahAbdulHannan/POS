@@ -2,97 +2,64 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const Request = require("../models/requestModel");
 const Package = require("../models/packageModel");
 const Admin = require("../models/admin");
-// @desc Create Stripe checkout session and save request
-// @route POST /api/checkout/create-session
-// exports.createCheckoutSession = async (req, res) => {
+
+
+// const createCheckoutSession=async (req, res) => {
 //   try {
-//     const { name, email, packageId } = req.body;
+//     const { packageId, name, email ,type} = req.body;
+//     const pkg = await Package.findById(packageId);
+//     if (!pkg) return res.status(404).json({ message: "Package not found" });
 
-//     if (!name || !email || !packageId) {
-//       return res.status(400).json({ message: "All fields are required" });
-//     }
-
-//     // Check if email already has a pending request
-//     const existingRequest = await Request.findOne({ email });
-//     if (existingRequest) {
-//       return res.status(400).json({ message: "A request already exists with this email" });
-//     }
-
-//     // Get package details
-//     const selectedPackage = await Package.findById(packageId);
-//     if (!selectedPackage) {
-//       return res.status(404).json({ message: "Package not found" });
-//     }
-
-//     // Create Stripe Checkout Session
 //     const session = await stripe.checkout.sessions.create({
 //       payment_method_types: ["card"],
-//       mode: "payment",
-//       line_items: [
-//         {
-//           price_data: {
-//             currency: "usd",
-//             product_data: {
-//               name: selectedPackage.title,
-//             },
-//             unit_amount: selectedPackage.amount * 100,
+//       line_items: [{
+//         price_data: {
+//           currency: "usd",
+//           product_data: {
+//             name: pkg.title,
 //           },
-//           quantity: 1,
+//           unit_amount: pkg.amount * 100,
 //         },
-//       ],
-//       customer_email: email,
-//       success_url: `http://localhost:3000/superadmin`,
-//       cancel_url: `http://localhost:3000/speradmin`,
-//       metadata: {
-//         name,
-//         email,
-//         packageId: selectedPackage._id.toString(),
-//       },
+//         quantity: 1,
+//       }],
+//       mode: "payment",
+//       success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&packageId=${pkg._id}&type=${type}`,
+
+//       cancel_url: "http://localhost:3000",
 //     });
 
-//     // Save the request in DB
-//     const newRequest = new Request({
-//       name,
-//       email,
-//       package: {
-//         title: selectedPackage.title,
-//         amount: selectedPackage.amount,
-//         durationInDays: selectedPackage.durationInDays,
-//         packageId: selectedPackage._id,
-//       },
-//       stripeSessionId: session.id,
-//     });
-
-//     await newRequest.save();
-
-//     res.status(200).json({ sessionId: session.id });
-//   } catch (error) {
-//     console.error("Stripe session error:", error);
-//     res.status(500).json({ message: "Something went wrong" });
+//     return res.status(200).json({ sessionId: session.id });
+//   } catch (err) {
+//     console.error("Stripe session error:", err);
+//     return res.status(500).json({ message: "Failed to create Stripe session" });
 //   }
-// };
-
-const createCheckoutSession=async (req, res) => {
+// }
+const createCheckoutSession = async (req, res) => {
   try {
-    const { packageId, name, email } = req.body;
+    const { packageId, name, email, type } = req.body;
+
     const pkg = await Package.findById(packageId);
     if (!pkg) return res.status(404).json({ message: "Package not found" });
+
+    let admin = null;
+    if (type === "renew") {
+      admin = await Admin.findOne({ email });
+      if (!admin) return res.status(404).json({ message: "Admin not found for renewal" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [{
         price_data: {
           currency: "usd",
-          product_data: {
-            name: pkg.title,
-          },
+          product_data: { name: pkg.title },
           unit_amount: pkg.amount * 100,
         },
         quantity: 1,
       }],
       mode: "payment",
-      success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&packageId=${pkg._id}`,
-      cancel_url: "http://localhost:3000",
+      success_url: `http://localhost:3000/payment-success?session_id={CHECKOUT_SESSION_ID}&name=${encodeURIComponent(name)}&email=${encodeURIComponent(email)}&packageId=${pkg._id}&type=${type || "new"}`,
+      cancel_url: "http://localhost:3000/hold",
     });
 
     return res.status(200).json({ sessionId: session.id });
@@ -100,10 +67,45 @@ const createCheckoutSession=async (req, res) => {
     console.error("Stripe session error:", err);
     return res.status(500).json({ message: "Failed to create Stripe session" });
   }
-}
-const verifyCheckoutSession= async (req, res) => {
+};
+
+// const verifyCheckoutSession = async (req, res) => {
+//   const { sessionId } = req.params;
+//   const { name, email, packageId, type = "new" } = req.query;
+
+//   try {
+//     const session = await stripe.checkout.sessions.retrieve(sessionId);
+//     if (session.payment_status !== "paid") {
+//       return res.status(400).json({ message: "Payment not completed" });
+//     }
+
+//     const alreadyExists = await Request.findOne({ stripeSessionId: sessionId });
+//     if (alreadyExists) return res.status(200).json({ message: "Already saved" });
+
+//     const selectedPackage = await Package.findById(packageId);
+//     if (!selectedPackage) return res.status(404).json({ message: "Package not found." });
+
+//     await Request.create({
+//       name,
+//       email,
+//       packageId,
+//       packageName: selectedPackage.title,
+//       amount: selectedPackage.amount,
+//       paymentTime: new Date(session.created * 1000),
+//       stripeSessionId: sessionId,
+//       type  // "new" or "renewal"
+//     });
+
+//     return res.status(200).json({ message: "Payment verified & request saved" });
+//   } catch (err) {
+//     console.error("Session verify error:", err.message);
+//     return res.status(500).json({ message: "Error verifying session" });
+//   }
+// };
+
+const verifyCheckoutSession = async (req, res) => {
   const { sessionId } = req.params;
-  const { name, email, packageId } = req.query;
+  const { name, email, packageId, type } = req.query;
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
@@ -117,22 +119,31 @@ const verifyCheckoutSession= async (req, res) => {
     const selectedPackage = await Package.findById(packageId);
     if (!selectedPackage) return res.status(404).json({ message: "Package not found." });
 
-    await Request.create({
+    const requestData = {
       name,
       email,
       packageId,
       packageName: selectedPackage.title,
       amount: selectedPackage.amount,
       paymentTime: new Date(session.created * 1000),
-      stripeSessionId: sessionId
-    });
+      stripeSessionId: sessionId,
+      isRenewal: type === "renew"
+    };
 
+    if (type === "renew") {
+      const admin = await Admin.findOne({ email });
+      if (!admin) return res.status(404).json({ message: "Admin not found for renewal" });
+      requestData.adminId = admin._id;
+    }
+
+    await Request.create(requestData);
     return res.status(200).json({ message: "Payment verified & request saved" });
   } catch (err) {
     console.error("Session verify error:", err.message);
     return res.status(500).json({ message: "Error verifying session" });
   }
-}
+};
+
 const checkEmailController=async (req, res) => {
   const { email } = req.query;
 

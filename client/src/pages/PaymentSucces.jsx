@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 
 const PaymentSuccess = () => {
@@ -32,12 +32,14 @@ const PaymentSuccess = () => {
       <div>
         <h1 className="text-3xl font-bold text-green-700 mb-4">🎉 Payment Success</h1>
         <p className="text-lg text-gray-800">{message}</p>
+         <Link to={'/'}>
          <button
             // onClick={navigate('/')}
             className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors mx-auto"
-          >
+            >
             Go to Home
           </button>
+            </Link>
       </div>
     </div>
   );

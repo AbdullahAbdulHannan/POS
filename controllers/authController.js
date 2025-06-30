@@ -15,15 +15,7 @@ const superadminLogin = async (req, res) => {
   res.status(200).json({ token });
 };
 
-// const createAdmin = async (req, res) => {
-//   try {
-//     const admin = new Admin(req.body);
-//     await admin.save();
-//     res.status(201).json({ message: "Admin created" });
-//   } catch (err) {
-//     res.status(500).json({ message: "Admin creation failed", error: err.message });
-//   }
-// };
+
 
 
 const createAdmin = async (req, res) => {
@@ -89,10 +81,17 @@ const createAdmin = async (req, res) => {
 const adminLogin = async (req, res) => {
   try {
     const { adminId, password } = req.body;
-
     const admin = await Admin.findOne({ adminId, password });
+
     if (!admin) {
       return res.status(401).json({ message: "Invalid admin credentials" });
+    }
+
+    // Check subscription
+    const subscription = await Subscription.findOne({ adminId: admin._id });
+    const now = new Date();
+    if (!subscription || subscription.endDate < now) {
+      return res.status(403).json({ message: "Subscription expired" });
     }
 
     const token = jwt.sign(
@@ -104,13 +103,13 @@ const adminLogin = async (req, res) => {
     res.status(200).json({ message: "Login successful", token, admin });
   } catch (error) {
     console.error("Admin Login Error:", error.message);
-    res.status(500).json({ message: "Internal Server Error", error: error.message });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 const userLogin = async (req, res) => {
   try {
     console.log("Login body:", req.body);
-
     const { userId, password } = req.body;
 
     const user = await User.findOne({ userId, password });
@@ -118,6 +117,14 @@ const userLogin = async (req, res) => {
 
     if (!user) {
       return res.status(401).json({ message: "Invalid user credentials" });
+    }
+
+    // Check the parent Admin's subscription
+    const subscription = await Subscription.findOne({ adminId: user.admin });
+    const now = new Date();
+
+    if (!subscription || subscription.endDate < now) {
+      return res.status(403).json({ message: "Subscription expired" });
     }
 
     const token = jwt.sign(
@@ -132,6 +139,7 @@ const userLogin = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 };
+
 
 
 module.exports = { superadminLogin, createAdmin, adminLogin ,userLogin};

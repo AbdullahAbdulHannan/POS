@@ -5,9 +5,10 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const { getUserCount } = require("../controllers/adminController");
 const admin = require("../models/admin");
 const bcrypt = require("bcrypt");
+const checkSubscription = require('../middleware/checkSubscription');
 router.post("/create-user", verifyToken("admin"), createUser);
-router.get("/users", verifyToken("admin"), getUsersByAdmin);
-router.get("/users/count",verifyToken("admin"), getUserCount);
+router.get("/users",checkSubscription, verifyToken("admin"), getUsersByAdmin);
+router.get("/users/count",checkSubscription,verifyToken("admin"), getUserCount);
 
 router.put("/update-password", verifyToken("admin"),updatePassword);
 

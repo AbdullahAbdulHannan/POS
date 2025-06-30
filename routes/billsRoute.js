@@ -15,9 +15,9 @@ const router = express.Router();
 router.post("/add-bills",verifyToken("user"), addBillsController);
 
 //MEthod - GET
-router.get("/get-bills",checkSubscription, verifyToken("user"),getBillsController);
+router.get("/get-bills", verifyToken("user"),checkSubscription,getBillsController);
 // routes/billsRoutes.js
-router.get("/admin/bills",checkSubscription, verifyToken("admin"), getAdminBillsController);
+router.get("/admin/bills", verifyToken("admin"),checkSubscription, getAdminBillsController);
 
 // router.get('/admin-stats', getAdminStats);
 module.exports = router;

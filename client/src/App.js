@@ -9,34 +9,30 @@ import { useEffect } from "react";
 import { checkTokenExpiry } from "./utils/checkTokenExpiry";
 import HomePage from "./pages/HomePage";
 import PaymentSuccess from "./pages/PaymentSucces";
+import Hold from "./pages/Hold";
 
 function App() {
   useEffect(() => {
-  checkTokenExpiry();
-}, []);
+    checkTokenExpiry();
+  }, []);
 
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route
-            path="/"
-            element={
-             <HomePage/>
-            }/>
+          <Route path="/" element={<HomePage />} />
           <Route
             path="/user/*"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRole="user">
                 <UserDash />
               </ProtectedRoute>
             }
           />
-          
           <Route
             path="/admin/*"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute allowedRole="admin">
                 <AdminDashboard />
               </ProtectedRoute>
             }
@@ -44,12 +40,13 @@ function App() {
           <Route
             path="/superadmin/*"
             element={
-              <ProtectedRouteSA>
+              <ProtectedRoute allowedRole="superadmin">
                 <SuperadminDashboard />
-              </ProtectedRouteSA>
+              </ProtectedRoute>
             }
           />
           <Route path="/login" element={<Login />} />
+          <Route path="/hold" element={<Hold />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
       </BrowserRouter>
@@ -58,18 +55,20 @@ function App() {
 }
 
 export default App;
+export function ProtectedRoute({ allowedRole, children }) {
+  const authData = JSON.parse(localStorage.getItem("auth"));
 
-export function ProtectedRoute({ children }) {
-  if (localStorage.getItem("auth")) {
-    return children;
-  } else {
+  if (!authData) return <Navigate to="/login" />;
+
+  // Check if user has correct role
+  if (authData.role !== allowedRole) {
     return <Navigate to="/login" />;
   }
-}
-export function ProtectedRouteSA({ children }) {
-  if (localStorage.getItem("auth")) {
-    return children;
-  } else {
-    return <Navigate to="/login" />;
+
+  // Check for subscription expiry (only for admin or user)
+  if ((allowedRole === "admin" || allowedRole === "user") && authData.subscriptionExpired) {
+    return <Navigate to="/hold" />;
   }
+
+  return children;
 }

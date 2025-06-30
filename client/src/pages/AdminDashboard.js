@@ -6,36 +6,36 @@ import CreateUserForm from "../components/CreateUserForm";
 import CategoryItemsManager from "../components/CategoryItemsManager";
 import Profile from "../pages/Profile";
 import AdminBillsScreen from "./AdminBills";
-import { useState } from "react";
-import { useEffect } from "react";
-import axios from "axios";
+// import { useState } from "react";
+// import { useEffect } from "react";
+// import axios from "axios";
 
 
 const AdminDashboard = () => {
   const adminId = JSON.parse(localStorage.getItem("auth")).admin._id;
-  const navigate = useNavigate()
-  const [data, setData] = useState(null)
-  const token = JSON.parse(localStorage.getItem("auth")).token;
+  // const navigate = useNavigate()
+  // const [data, setData] = useState(null)
+  // const token = JSON.parse(localStorage.getItem("auth")).token;
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await axios.get('/api/admin/dashboard', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        setData(res.data)
-      } catch (err) {
-        if (err.response && err.response.status === 403) {
-          // Subscription expired – redirect to Hold Screen
-          navigate('/hold')
-        }
-      }
-    }
+  // useEffect(() => {
+  //   const fetchDashboard = async () => {
+  //     try {
+  //       const res = await axios.get('/api/admin/dashboard', {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`
+  //         }
+  //       })
+  //       setData(res.data)
+  //     } catch (err) {
+  //       if (err.response && err.response.status === 403) {
+  //         // Subscription expired – redirect to Hold Screen
+  //         navigate('/hold')
+  //       }
+  //     }
+  //   }
 
-    fetchDashboard()
-  }, [token, navigate])
+  //   fetchDashboard()
+  // }, [token, navigate])
   return (
     <DefaultLayout>
       <div className="">

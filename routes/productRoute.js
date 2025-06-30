@@ -12,12 +12,12 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const checkSubscription = require('../middleware/checkSubscription')
 
 router.post("/create-product", verifyToken("admin"), createProduct);
-router.get("/", checkSubscription,verifyToken("admin"), getProducts);
-router.get("/user-products",checkSubscription, verifyToken("user"), getProducts);
+router.get("/", verifyToken("admin"),checkSubscription, getProducts);
+router.get("/user-products", verifyToken("user"),checkSubscription, getProducts);
 router.put("/:id", verifyToken("admin"), updateProduct);
 router.delete("/:id", verifyToken("admin"), deleteProduct);
 router.post("/assign-stock", verifyToken("admin"),assignStockController);
-router.get("/user-stock/:userId",checkSubscription, verifyToken(["admin", "user"]), getUserStockController);
+router.get("/user-stock/:userId", verifyToken(["admin", "user"]),checkSubscription, getUserStockController);
 
 
 module.exports = router;

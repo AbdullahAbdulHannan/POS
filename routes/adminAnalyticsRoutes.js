@@ -10,9 +10,9 @@ const {
 } = require("../controllers/statsController");
 const { verifyToken } = require("../middleware/authMiddleware");
 
-router.get("/total-sales",checkSubscription, verifyToken("admin"), getTotalSales);
-router.get("/total-orders",checkSubscription, verifyToken("admin"), getTotalOrders);
-router.get("/monthly-sales",checkSubscription, verifyToken("admin"), getMonthlySales);
-router.get("/top-categories",checkSubscription, verifyToken("admin"), getTopCategories);
+router.get("/total-sales", verifyToken("admin"),checkSubscription, getTotalSales);
+router.get("/total-orders", verifyToken("admin"),checkSubscription, getTotalOrders);
+router.get("/monthly-sales", verifyToken("admin"),checkSubscription, getMonthlySales);
+router.get("/top-categories", verifyToken("admin"),checkSubscription, getTopCategories);
 
 module.exports = router;

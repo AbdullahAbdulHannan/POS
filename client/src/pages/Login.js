@@ -11,70 +11,82 @@ const Login = () => {
   const [form] = Form.useForm();
   const [role, setRole] = useState("user");
 
-  const handleSubmit = async (values) => {
-    const { identifier, password, role } = values;
-    console.log(role);
-    
-    try {
-      // If identifier looks like an email, try superadmin login
-      if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(identifier)) {
-        // Superadmin login
-        if(role=="superadmin"){
+ const handleSubmit = async (values) => {
+  const { identifier, password, role } = values;
+  console.log(role);
 
-          const res = await axios.post("/api/auth/superadmin/login", {
-            email: identifier,
-            password,
-          });
-          if (res.data && res.data.token) {
-            localStorage.setItem(
-              "auth",
-              JSON.stringify({ ...res.data, role: "superadmin" })
-            );
-            message.success("Superadmin logged in successfully!");
-            navigate("/superadmin");
-            return;
-          }
-        }
-      }
-      // Admin login
-      if (role === "admin") {
-        const res = await axios.post("/api/auth/admin/login", {
-          adminId: identifier,
+  try {
+    // Superadmin login
+    if (role === "superadmin") {
+      if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(identifier)) {
+        const res = await axios.post("/api/auth/superadmin/login", {
+          email: identifier,
           password,
         });
+
         if (res.data && res.data.token) {
           localStorage.setItem(
             "auth",
-            JSON.stringify({ ...res.data, role: "admin" })
+            JSON.stringify({ ...res.data, role: "superadmin" })
           );
-          message.success("Admin logged in successfully!");
-          navigate("/admin");
+          message.success("Superadmin logged in successfully!");
+          navigate("/superadmin");
           return;
         }
       }
-      // User login
-      if (role === "user") {
-        const res = await axios.post("/api/auth/user/login", {
-          userId: identifier,
-          password,
-        });
-        if (res.data && res.data.user.role === "user") {
-          localStorage.setItem(
-            "auth",
-            JSON.stringify({ ...res.data, role: "user" })
-          );
-          message.success("User logged in successfully!");
-          navigate("/user");
-          return;
-        }
-      }
-      message.error("Invalid credentials or role.");
-    } catch (error) {
-      message.error(
-        error.response?.data?.message || "Login failed. Please check your credentials."
-      );
     }
-  };
+
+    // Admin login
+    if (role === "admin") {
+      const res = await axios.post("/api/auth/admin/login", {
+        adminId: identifier,
+        password,
+      });
+
+      if (res.data && res.data.token) {
+        localStorage.setItem(
+          "auth",
+          JSON.stringify({ ...res.data, role: "admin" })
+        );
+        message.success("Admin logged in successfully!");
+        navigate("/admin");
+        return;
+      }
+    }
+
+    // User login
+    if (role === "user") {
+      const res = await axios.post("/api/auth/user/login", {
+        userId: identifier,
+        password,
+      });
+
+      if (res.data && res.data.token) {
+        localStorage.setItem(
+          "auth",
+          JSON.stringify({ ...res.data, role: "user" })
+        );
+        message.success("User logged in successfully!");
+        navigate("/user");
+        return;
+      }
+    }
+
+    message.error("Invalid credentials or role.");
+  } catch (error) {
+    // ⛔ Handle subscription expiry for Admin/User
+    if (error.response?.data?.message === "Subscription expired") {
+      message.error("Your subscription has expired. Please contact support.");
+      navigate("/hold");
+      return;
+    }
+
+    message.error(
+      error.response?.data?.message || "Login failed. Please check your credentials."
+    );
+  }
+};
+
 
   useEffect(() => {
     const auth = localStorage.getItem("auth");

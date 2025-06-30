@@ -1,23 +1,19 @@
+import React from "react";
+import { Button, message } from "antd";
+import axios from "axios";
+
 const Hold = () => {
+
+
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-100 text-center px-4">
-      <div className="max-w-md p-6 bg-white rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-red-600 mb-4">
-          Subscription Expired
-        </h1>
-        <p className="text-gray-700 mb-4">
-          Your access is currently on hold due to an expired subscription.
-          Please contact support or renew your plan to regain access.
-        </p>
-        <a
-          href="/pricing"
-          className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-        >
-          Renew Subscription
-        </a>
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+        <h2 className="text-2xl font-semibold text-red-600 mb-4">Subscription Expired</h2>
+        <p className="mb-6 text-gray-700">Your access is currently on hold. Please renew your subscription to continue using the system.</p>
+        <p className="text-gray-900">Plz contact our support</p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Hold
+export default Hold;

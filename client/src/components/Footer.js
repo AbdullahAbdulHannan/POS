@@ -8,7 +8,7 @@ const Footer = () => {
             <div className="col-span-1 md:col-span-2">
               <div className="flex items-center space-x-2 mb-4">
                 <Store className="h-8 w-8 text-blue-400" />
-                <span className="text-2xl font-bold">ModernPOS</span>
+                <span className="text-2xl font-bold">POS</span>
               </div>
               <p className="text-gray-400 mb-6 max-w-md">
                 Empowering businesses with modern point-of-sale solutions. 
@@ -21,7 +21,7 @@ const Footer = () => {
                 </div>
                 <div className="flex items-center space-x-2 text-gray-400">
                   <Mail className="h-4 w-4" />
-                  <span>support@modernpos.com</span>
+                  <span>support@POS.com</span>
                 </div>
               </div>
             </div>
@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 ModernPOS. All rights reserved.</p>
+            <p>&copy; 2024 POS. All rights reserved.</p>
           </div>
         </div>
       </footer>

@@ -32,6 +32,7 @@ const PaymentSuccess = () => {
       <div>
         <h1 className="text-3xl font-bold text-green-700 mb-4">🎉 Payment Success</h1>
         <p className="text-lg text-gray-800">{message}</p>
+        <p className="text-lg text-gray-800">We will contact you soon!</p>
          <Link to={'/'}>
          <button
             // onClick={navigate('/')}

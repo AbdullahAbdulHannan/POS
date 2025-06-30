@@ -33,41 +33,6 @@ const [formData, setFormData] = useState({ name: '', email: '' });
 
     fetchPackages();
   }, []);
-// const handleGetStarted = async (pkg) => {
-//   try {
-//     const name = prompt("Enter your full name");
-//     const email = prompt("Enter your email");
-
-//     if (!name || !email) return alert("Name and email required");
-
-//     const checkRes = await axios.get(`/api/checkout/check-email`, {
-//       params: { email },
-//     });
-//     const { data } = await axios.post("/api/checkout/create-session", {
-//       packageId: pkg._id,
-//       name,
-//       email,
-//     });
-
-//     if (!data.sessionId) {
-//       alert("Stripe URL not received");
-//       return;
-//     }
-
-//     // ✅ Only redirect to Stripe hosted checkout page
-//     const stripe = await loadStripe("pk_test_51RfFqjPIM2xb8ciPB6UGYDf4LLIIwOb1D2Jml1XYY0b7AY3QrjUjQvykBN7yxyfb76lsncJJWMZpkhsbwqtrrFcz00de9a1c7Q");
-//     await stripe.redirectToCheckout({ sessionId: data.sessionId });
-
-//   }  catch (error) {
-//     // ❗ Handle error if email already exists
-//     if (error?.response?.status === 409) {
-//       alert("This email already exists! Please try a different one.");
-//     } else {
-//       alert("Failed to initiate payment. Please try again later.");
-//     }
-//     console.error("Checkout error:", error);
-//   }
-// };
 
 
 const initiateCheckout = async () => {
@@ -86,7 +51,6 @@ const initiateCheckout = async () => {
       return;
     }
 
-    // ✅ Only redirect to Stripe hosted checkout page
     const stripe = await loadStripe("pk_test_51RfFqjPIM2xb8ciPB6UGYDf4LLIIwOb1D2Jml1XYY0b7AY3QrjUjQvykBN7yxyfb76lsncJJWMZpkhsbwqtrrFcz00de9a1c7Q");
     await stripe.redirectToCheckout({ sessionId: data.sessionId });
 
